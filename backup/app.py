@@ -8,14 +8,7 @@ import numpy as np
 import os
 import time
 from Upsample import RealESRGAN
-from google.colab import userdata
-
-# --- Load HF_TOKEN from Google Colab secrets ---
-try:
-    HF_TOKEN = userdata.get('HF_TOKEN')
-    os.environ['HF_TOKEN'] = HF_TOKEN
-except Exception as e:
-    st.warning(f"Error loading HF_TOKEN from Colab secrets: {e}. Please ensure you have set the HF_TOKEN in Colab secrets.")
+# from spaces import GPU
 
 # --- Configuration and Model Loading ---
 model_path = "deepseek-ai/Janus-Pro-7B"
@@ -111,8 +104,8 @@ def generate(input_ids,
     for i in range(image_token_num_per_image):
         with torch.no_grad():
             outputs = vl_gpt.language_model.model(inputs_embeds=inputs_embeds,
-                                               use_cache=True,
-                                               past_key_values=pkv)
+                                                use_cache=True,
+                                                past_key_values=pkv)
             pkv = outputs.past_key_values
             hidden_states = outputs.last_hidden_state
             logits = vl_gpt.gen_head(hidden_states[:, -1, :])
@@ -164,11 +157,11 @@ def generate_image(prompt,
 
         input_ids = torch.LongTensor(tokenizer.encode(text))
         output, patches = generate(input_ids,
-                                  width // 16 * 16,
-                                  height // 16 * 16,
-                                  cfg_weight=guidance,
-                                  parallel_size=parallel_size,
-                                  temperature=t2i_temperature)
+                                   width // 16 * 16,
+                                   height // 16 * 16,
+                                   cfg_weight=guidance,
+                                   parallel_size=parallel_size,
+                                   temperature=t2i_temperature)
         images = unpack(patches,
                         width // 16 * 16,
                         height // 16 * 16,
@@ -179,6 +172,7 @@ def generate_image(prompt,
         print(f'upsample time: {time.time() - stime}')
         return ret_images
 
+# @GPU(duration=60)
 def image_upsample(img: Image.Image) -> Image.Image:
     if img is None:
         raise Exception("Image not uploaded")
@@ -210,6 +204,7 @@ with st.sidebar:
         "Created by [Ruslan Magana Vsevolodovna](https://ruslanmv.com/)"
     )
 
+
 # --- Main Content ---
 st.title("Multimodal Understanding and Text-to-Image Generation with Janus Pro")
 
@@ -220,11 +215,11 @@ with st.expander("**Multimodal Understanding**", expanded=True):
     with col1:
         image_input = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
         question_input = st.text_input("Enter your question about the image")
-
+        
     with col2:
         top_p = st.slider("Top-p", min_value=0.0, max_value=1.0, value=0.95, step=0.05)
         temperature = st.slider("Temperature", min_value=0.0, max_value=1.0, value=0.1, step=0.05)
-
+        
     if image_input and question_input:
         image = Image.open(image_input).convert("RGB")
         image_np = np.array(image)
@@ -233,7 +228,7 @@ with st.expander("**Multimodal Understanding**", expanded=True):
         st.text_area("Response", value=response, height=200)
     else:
         st.info("Please upload an image and enter a question to start multimodal understanding.")
-
+    
     # Examples
     st.markdown("**Examples**")
     example_col1, example_col2 = st.columns(2)
@@ -268,7 +263,7 @@ with st.expander("**Text-to-Image Generation**", expanded=True):
         cfg_weight_input = st.slider("CFG Weight", min_value=1.0, max_value=10.0, value=5.0, step=0.5)
     with t2i_col2:
         t2i_temperature = st.slider("T2I Temperature", min_value=0.0, max_value=1.0, value=1.0, step=0.05)
-
+    
     if st.button("Generate Images"):
         if prompt_input:
             with st.spinner("Generating images..."):
@@ -279,13 +274,13 @@ with st.expander("**Text-to-Image Generation**", expanded=True):
 
     # Examples
     st.markdown("**Examples**")
-
+    
     example_prompts = [
         "Master shifu racoon wearing drip attire as a street gangster.",
         "The face of a beautiful girl",
         "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
         "A cute and adorable baby fox with big brown eyes, autumn leaves in the background enchanting,immortal,fluffy, shiny mane,Petals,fairyism,unreal engine 5 and Octane Render,highly detailed, photorealistic, cinematic, natural colors.",
-        "The image features an intricately designed eye set against a circular backdrop adorned with ornate swirl patterns that evoke both realism and surrealism. At the center of attention is a strikingly vivid blue iris surrounded by delicate veins radiating outward from the pupil to create depth and intensity. The eyelashes are long and dark, casting subtle shadows on the skin around them which appears smooth yet slightly textured as if aged or weathered over time.\n\nAbove the eye, there's a stone-like structure resembling part of classical architecture, adding layers of mystery and timeless elegance to the composition. This architectural element contrasts sharply but harmoniously with the organic curves surrounding it. Below the eye lies another decorative motif reminiscent of baroque artistry, further enhancing the overall sense of eternity encapsulated within each meticulously crafted detail. \n\nOverall, the atmosphere exudes a mysterious aura intertwined seamlessly with elements suggesting timelessness, achieved through the juxtaposition of realistic textures and surreal artistic flourishes. Each component—from the intricate designs framing the eye to the ancient-looking stone piece above—contributes uniquely towards creating a visually captivating tableau imbued with enigmatic allure."
+        "The image features an intricately designed eye set against a circular backdrop adorned with ornate swirl patterns that evoke both realism and surrealism. At the center of attention is a strikingly vivid blue iris surrounded by delicate veins radiating outward from the pupil to create depth and intensity. The eyelashes are long and dark, casting subtle shadows on the skin around them which appears smooth yet slightly textured as if aged or weathered over time.\n\nAbove the eye, there's a stone-like structure resembling part of classical architecture, adding layers of mystery and timeless elegance to the composition. This architectural element contrasts sharply but harmoniously with the organic curves surrounding it. Below the eye lies another decorative motif reminiscent of baroque artistry, further enhancing the overall sense of eternity encapsulated within each meticulously crafted detail. \n\nOverall, the atmosphere exudes a mysterious aura intertwined seamlessly with elements suggesting timelessness, achieved through the juxtaposition of realistic textures and surreal artistic flourishes. Each component\u2014from the intricate designs framing the eye to the ancient-looking stone piece above\u2014contributes uniquely towards creating a visually captivating tableau imbued with enigmatic allure."
     ]
 
     for i, example_prompt in enumerate(example_prompts):
