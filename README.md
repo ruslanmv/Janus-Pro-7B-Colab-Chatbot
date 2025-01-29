@@ -1,5 +1,5 @@
 # Janus-Pro: A Unified Multimodal Understanding and Generation Framework
-
+![](assets/2025-01-29-01-08-23.png)
 ## Introduction
 
 In the rapidly evolving field of artificial intelligence, the ability to understand and generate multimodal content—such as images and text—has become increasingly important. **Janus-Pro** is a novel autoregressive framework that unifies multimodal understanding and generation, addressing the limitations of previous approaches. By decoupling visual encoding into separate pathways, Janus-Pro enhances flexibility and performance, making it a strong candidate for next-generation unified multimodal models.
@@ -332,6 +332,8 @@ and generation of images
 ![](assets/2025-01-29-01-00-49.png)
 
 
+
+You can execute the previos code on google colab with the A100 GPU [here](https://colab.research.google.com/github/ruslanmv/Janus-Pro-7B-Colab-Chatbot/blob/master/app.ipynb)
 ## Conclusion
 
 Janus-Pro represents a significant advancement in the field of multimodal AI, offering a unified framework for both understanding and generation tasks. Its decoupled visual encoding approach and unified transformer architecture make it a versatile and powerful tool for a wide range of applications. By exploring the mathematical foundations and practical implementation provided in this blog, you can gain a deeper understanding of how Janus-Pro works and how to leverage its capabilities in your own projects.
